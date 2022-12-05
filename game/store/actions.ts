@@ -1,6 +1,6 @@
-import { Path } from './game-objects'
-import { state } from './state'
-import { getCellAtIndex, getCellAtPos } from './utils'
+import { Path } from '../objects'
+import { state } from '.'
+import { getCellAtIndex, getCellAtPos } from '../utils'
 
 export function toggleCanWalk() {
   if (!state.selectedCell) return
@@ -8,6 +8,7 @@ export function toggleCanWalk() {
   const path = state.scene.childOfType(Path)
   const cell = getCellAtIndex(state.selectedCell.indexX, state.selectedCell.indexY)
   if (!cell) return
+  if (!cell.canBuild) return
 
   cell.canWalk = !cell.canWalk
   path?.computePath()

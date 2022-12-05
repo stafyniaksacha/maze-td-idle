@@ -4,8 +4,9 @@ import { state, useRenderer, toggleCanWalk } from './game'
 const cols = ref(3)
 const rows = ref(3)
 const tileSize = ref(50)
+const counter = ref(0)
 
-const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
+const { containerRef, canvasRef, requestDraw } = useRenderer(cols, rows, tileSize)
 </script>
 
 <template>
@@ -37,6 +38,18 @@ const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
             <input id="cols" type="number" v-model="cols" min="1" />
           </div>
         </div>
+        <div class="flex flex-row p-2 gap-2">
+          <div class="w-1/2 flex flex-col gap-1">
+            <button type="button" @click="() => {
+              counter += 1
+            }">
+              counter ++
+            </button>
+          </div>
+          <div class="w-1/2 flex flex-col gap-1">
+            {{ counter }}
+          </div>
+        </div>
         <div class="flex flex-row">
           <div class="bg-slate-500 w-full">
             <pre>{{ { ...state, scene: state.scene?.toString() } }}</pre>
@@ -44,7 +57,10 @@ const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
         </div>
         <div class="flex flex-row" v-if="state.selectedCell">
           <div class="bg-slate-500 w-full">
-            <button type="button" @click="toggleCanWalk">
+            <button type="button" @click="() => {
+              toggleCanWalk()
+              requestDraw()
+            }">
               toggle canWalk
             </button>
           </div>

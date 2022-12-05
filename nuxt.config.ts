@@ -6,4 +6,7 @@ export default defineNuxtConfig({
     'nuxt-icon',
   ],
   ssr: false,
+  typescript: {
+    shim: false,
+  }
 })

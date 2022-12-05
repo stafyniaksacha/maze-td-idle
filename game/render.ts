@@ -1,9 +1,9 @@
 // import type { Scene } from "./game-objects"
 
 import type { MaybeRef } from "@vueuse/core"
-import { selectCell } from "./actions"
-import { Scene } from "./game-objects"
-import { state } from './state'
+import { selectCell } from "./store"
+import { Scene } from "./objects"
+import { state } from './store'
 
 const FRAMES_PER_SECOND = 60
 const FRAME_MIN_TIME = (1000/60) * (60 / FRAMES_PER_SECOND) - (1000/60) * 0.5
@@ -31,7 +31,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     canvas.height = container.offsetHeight
   }
   
-  function init() {
+  async function init() {
     const canvas = canvasRef.value
     if (!canvas) return
 
@@ -42,8 +42,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
       rows: rows.value,
       tileSize: tileSize.value,
     }))
-    state.scene?.init()
-    console.log('init', state.scene)
+    await state.scene?.init()
   }
 
   function draw(time: number) {
@@ -63,7 +62,6 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     }
     lastFrameAt = time
 
-    // console.log('draw', deltaTime)
     // ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     ctx.fillStyle = 'grey'
@@ -116,13 +114,13 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     }
 
     fitSize()
-    init()
+    await init()
     requestDraw()
   })
   
   watch([rows, cols, tileSize], async () => {
     fitSize()
-    init()
+    await init()
     requestDraw()
   })
 

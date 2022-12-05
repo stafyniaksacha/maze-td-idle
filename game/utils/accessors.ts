@@ -1,6 +1,6 @@
 
-import { Cell, Grid } from './game-objects'
-import { state } from './state'
+import { Cell, Grid } from '../objects'
+import { state } from '../store'
 
 export function getCellAtPos(x: number, y: number) {
   if (!state.scene) return null

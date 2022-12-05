@@ -1,5 +1,4 @@
-import { Cell, Grid } from "./game-objects"
-import { state } from "./state"
+import { Scene, Cell, Grid } from "../objects"
 
 function heuristicCostEstimate(a: Cell, b: Cell) {
   return Math.abs(a.indexX - b.indexX) + Math.abs(a.indexY - b.indexY)
@@ -15,8 +14,8 @@ function reconstructPath(cameFrom: Map<Cell, Cell>, current: Cell) {
 }
 
 function getNeighbors(current: Cell) {
-  if (!state.scene) return []
-  const grid = state.scene.childOfType(Grid)?.grid
+  const scene = current?.parentOfType?.(Scene)
+  const grid = scene?.childOfType?.(Grid)?.grid
   if (!grid) return []
 
   const neighbors = [] as Cell[]
@@ -26,13 +25,13 @@ function getNeighbors(current: Cell) {
   if (indexX > 0) {
     neighbors.push(grid[indexX - 1][indexY])
   }
-  if (indexX < state.scene.cols - 1) {
+  if (indexX < scene.cols - 1) {
     neighbors.push(grid[indexX + 1][indexY])
   }
   if (indexY > 0) {
     neighbors.push(grid[indexX][indexY - 1])
   }
-  if (indexY < state.scene.rows - 1) {
+  if (indexY < scene.rows - 1) {
     neighbors.push(grid[indexX][indexY + 1])
   }
 
