@@ -1,7 +1,7 @@
 // import type { Scene } from "./game-objects"
 
 import type { MaybeRef } from "@vueuse/core"
-import { selectCell } from "./store"
+import { selectTile } from "./store"
 import { Scene } from "./objects"
 import { state } from './store'
 
@@ -32,7 +32,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
   }
   
   async function init() {
-    const canvas = canvasRef.value
+    const canvas = unref(canvasRef)
     if (!canvas) return
 
     state.scene = markRaw(new Scene({
@@ -42,11 +42,13 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
       rows: rows.value,
       tileSize: tileSize.value,
     }))
-    await state.scene?.init()
+    state.scene?.init()
+    requestDraw()
   }
 
   function draw(time: number) {
-    const canvas = canvasRef.value
+    raf = null
+    const canvas = unref(canvasRef)
     if (!canvas || !ctx) return
 
     if (!startedAt) {
@@ -64,17 +66,19 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
 
     // ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+    ctx.save()
     ctx.fillStyle = 'grey'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.restore()
 
     state.scene?.drawTree(ctx)
+    requestDraw()
   }
 
   function requestDraw() {
-    if (raf) {
-      cancelAnimationFrame(raf)
+    if (!raf) {
+      raf = requestAnimationFrame(draw)
     }
-    raf = requestAnimationFrame(draw)
   }
   
   onBeforeUnmount(() => {
@@ -94,34 +98,28 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     canvas.onmouseenter = () => {
       if (state.isHover) return
       state.isHover = true
-      requestDraw()
     }
     canvas.onmouseleave = () => {
       if (!state.isHover) return
       state.isHover = false
-      requestDraw()
     }
     canvas.onmousemove = (event) => {
       state.mousePosition = {
         x: event.offsetX,
         y: event.offsetY
       }
-      requestDraw()
     }
     canvas.onclick = (event) => {
-      selectCell(event)
-      requestDraw()
+      selectTile(event)
     }
 
     fitSize()
-    await init()
-    requestDraw()
+    init()
   })
   
   watch([rows, cols, tileSize], async () => {
     fitSize()
-    await init()
-    requestDraw()
+    init()
   })
 
   return {

@@ -1,26 +1,32 @@
 
-import { Cell, Grid } from '../objects'
+import { Tile, Grid } from '../objects'
 import { state } from '../store'
 
-export function getCellAtPos(x: number, y: number) {
+export function getTileAtPos(x: number, y: number): Tile | null {
   if (!state.scene) return null
-  const cells = state.scene.childOfType(Grid)?.childrenOfType(Cell)
-  if (!cells) return null
+  const tiles = state.scene.grid?.tiles
+  if (!tiles) return null
 
-  for (let i = 0; i < cells.length; i++) {
-    const cell = cells[i]
-    if (x >= cell.cellX && x <= cell.cellX + cell.cellWidth &&
-      y >= cell.cellY && y <= cell.cellY + cell.cellHeight) {
-      return cell
+  for (let i = 0; i < tiles.length; i++) {
+    const tile = tiles[i]
+    if (x >= tile.cornerX && x <= tile.cornerX + tile.width &&
+      y >= tile.cornerY && y <= tile.cornerY + tile.height) {
+      return tile as Tile
     }
   }
   return null
 }
 
-export function getCellAtIndex(indexX: number, indexY: number) {
+export function getTileAtIndex(indexX: number, indexY: number): Tile | null {
   if (!state.scene) return null
-  const grid = state.scene.childOfType(Grid)
+  const grid = state.scene.grid
   if (!grid) return null
 
-  return grid.grid[indexX][indexY]
+  return grid.tilesmap[indexX][indexY] as Tile
+}
+
+export function isTileSelected(tile?: Tile): boolean {
+  if (!tile) return false
+  if (!state.selectedTile) return false
+  return state.selectedTile.indexX === tile.indexX && state.selectedTile.indexY === tile.indexY
 }

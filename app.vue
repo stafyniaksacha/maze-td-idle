@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { state, useRenderer, toggleCanWalk } from './game'
+import { state, useRenderer, buildFireTrap, buildArrowTower, removeBuilding, startWave } from './game'
 
 const cols = ref(3)
 const rows = ref(3)
 const tileSize = ref(50)
-const counter = ref(0)
 
-const { containerRef, canvasRef, requestDraw } = useRenderer(cols, rows, tileSize)
+const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
 </script>
 
 <template>
@@ -21,7 +20,7 @@ const { containerRef, canvasRef, requestDraw } = useRenderer(cols, rows, tileSiz
     </div>
     <!-- panel -->
     <div class="bg-blue-500 w-4/12">
-      <div class="flex flex-col h-full">
+      <div class="flex flex-col h-full  overflow-y-auto">
         <div class="flex flex-row p-2 gap-2">
           <div class="w-full flex flex-col gap-1">
             <label for="tileSize">tileSize</label>
@@ -38,40 +37,51 @@ const { containerRef, canvasRef, requestDraw } = useRenderer(cols, rows, tileSiz
             <input id="cols" type="number" v-model="cols" min="1" />
           </div>
         </div>
-        <div class="flex flex-row p-2 gap-2">
-          <div class="w-1/2 flex flex-col gap-1">
-            <button type="button" @click="() => {
-              counter += 1
+        
+        <div class="flex flex-row" v-if="state.selectedTile">
+          <div class="bg-green-500 w-full flex gap-2 p-2">
+            <button type="button" class="w-1/2 border" @click="() => {
+              buildFireTrap()
             }">
-              counter ++
+              build fire trap
+            </button>
+            <button type="button" class="w-1/2 border" @click="() => {
+              buildArrowTower()
+            }">
+              build arrow tower
             </button>
           </div>
-          <div class="w-1/2 flex flex-col gap-1">
-            {{ counter }}
+        </div>
+        
+        <div class="flex flex-row" v-if="state.selectedTile?.tile?.building">
+          <div class="bg-red-500 w-full flex gap-2 p-2">
+            <button type="button" class="w-full border" @click="() => {
+              removeBuilding()
+            }">
+              sell building
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-row" >
+          <div class="bg-lime-500 w-full flex gap-2 p-2" :class="[state.wave.started ? 'bg-orange-600' : 'bg-lime-500']">
+            <button type="button" class="w-full border" @click="() => {
+              startWave()
+            }">
+              {{state.wave.started ? `wave in progress` : `start wave ${state.wave.current}`}}
+            </button>
+          </div>
+        </div>
+        
+        <div class="flex flex-row" v-if="state.selectedTile">
+          <div class="bg-green-500 w-full">
+            <!-- <pre>{{ state.selectedTile }}</pre> -->
           </div>
         </div>
         <div class="flex flex-row">
           <div class="bg-slate-500 w-full">
-            <pre>{{ { ...state, scene: state.scene?.toString() } }}</pre>
+            <!-- <pre>{{ state }}</pre> -->
           </div>
-        </div>
-        <div class="flex flex-row" v-if="state.selectedCell">
-          <div class="bg-slate-500 w-full">
-            <button type="button" @click="() => {
-              toggleCanWalk()
-              requestDraw()
-            }">
-              toggle canWalk
-            </button>
-          </div>
-          <div class="bg-slate-500 w-full">
-            <pre>{{ JSON.stringify(state.selectedCell, null, 2) }}</pre>
-          </div>
-        </div>
-        <div class="grow"></div>
-        <div class="flex flex-row">
-          <div class="bg-green-500 w-1/2">g</div>
-          <div class="bg-green-500 w-1/2">h</div>
         </div>
       </div>
 

@@ -1,10 +1,10 @@
-import { Scene, Cell, Grid } from "../objects"
+import { Scene, Tile, Grid } from "../objects"
 
-function heuristicCostEstimate(a: Cell, b: Cell) {
-  return Math.abs(a.indexX - b.indexX) + Math.abs(a.indexY - b.indexY)
+function heuristicCostEstimate(a: Tile, b: Tile) {
+  return Math.abs(a.indexX - b.indexX) + Math.abs(a.indexY - b.indexY) + a.walkCost + b.walkCost
 }
 
-function reconstructPath(cameFrom: Map<Cell, Cell>, current: Cell) {
+function reconstructPath(cameFrom: WeakMap<Tile, Tile>, current: Tile) {
   const totalPath = [current]
   while (cameFrom.has(current)) {
     current = cameFrom.get(current)!
@@ -13,53 +13,52 @@ function reconstructPath(cameFrom: Map<Cell, Cell>, current: Cell) {
   return totalPath
 }
 
-function getNeighbors(current: Cell) {
-  const scene = current?.parentOfType?.(Scene)
-  const grid = scene?.childOfType?.(Grid)?.grid
+function getNeighbors(current: Tile) {
+  const grid = current?.grid
   if (!grid) return []
 
-  const neighbors = [] as Cell[]
+  const neighbors = [] as Tile[]
   const { indexX, indexY } = current
 
 
   if (indexX > 0) {
-    neighbors.push(grid[indexX - 1][indexY])
+    neighbors.push(grid.tilesmap[indexX - 1][indexY])
   }
-  if (indexX < scene.cols - 1) {
-    neighbors.push(grid[indexX + 1][indexY])
+  if (indexX < grid.cols - 1) {
+    neighbors.push(grid.tilesmap[indexX + 1][indexY])
   }
   if (indexY > 0) {
-    neighbors.push(grid[indexX][indexY - 1])
+    neighbors.push(grid.tilesmap[indexX][indexY - 1])
   }
-  if (indexY < scene.rows - 1) {
-    neighbors.push(grid[indexX][indexY + 1])
+  if (indexY < grid.rows - 1) {
+    neighbors.push(grid.tilesmap[indexX][indexY + 1])
   }
 
   return neighbors
 }
 
-export function getAStarPath(start: Cell, goal: Cell) {
-  const openSet = new Set<Cell>()
+export function getAStarPath(start: Tile, goal: Tile) {
+  const openSet = new Set<Tile>()
   openSet.add(start)
 
-  const cameFrom = new Map<Cell, Cell>()
+  const cameFrom = new WeakMap<Tile, Tile>()
 
-  const gScore = new Map<Cell, number>()
-  const fScore = new Map<Cell, number>()
+  const gScore = new WeakMap<Tile, number>()
+  const fScore = new WeakMap<Tile, number>()
 
   gScore.set(start, 0)
   fScore.set(start, heuristicCostEstimate(start, goal))
 
 
   while (openSet.size) {
-    let current: Cell | undefined
+    let current: Tile | undefined
     let currentFScore = Number.POSITIVE_INFINITY
 
-    for (const cell of openSet) {
-      const cellFScore = fScore.get(cell) ?? Number.POSITIVE_INFINITY
-      if (cellFScore < currentFScore) {
-        current = cell
-        currentFScore = cellFScore
+    for (const tile of openSet) {
+      const tileFScore = fScore.get(tile) ?? Number.POSITIVE_INFINITY
+      if (tileFScore < currentFScore) {
+        current = tile
+        currentFScore = tileFScore
       }
     }
 

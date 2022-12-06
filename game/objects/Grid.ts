@@ -1,15 +1,61 @@
-import { Cell } from "./Cell"
+import { Tile, TileSpawner, TileGoal } from "./tiles"
 import { GameObject } from "./GameObject"
 import { Scene } from "./Scene"
 
+import { state } from '../store'
+import { ArrowTower } from "./buildings"
+
 export class Grid extends GameObject {
-  grid: Cell[][] = []
+  gridOffsetX: number
+  gridOffsetY: number
+
+  tileSize: number
+  width: number
+  height: number
+  rows: number
+  cols: number
+  #tilesmap: Tile[][] = []
+
+  get tilesmap () {
+    return this.#tilesmap
+  }
+  get tiles () {
+    return this.childrenOfType(Tile) ?? []
+  }
+  get spawnerTiles () {
+    return this.childrenOfType(TileSpawner) ?? []
+  }
+  get goalTile () {
+    return this.childOfType(TileGoal)
+  }
+
+  
+  constructor(props?: {
+    rows: number
+    cols: number
+    tileSize: number
+    width: number
+    height: number
+  }) {
+    super()
+    this.rows = props?.rows ?? 1
+    this.cols = props?.cols ?? 1
+    this.tileSize = props?.tileSize ?? 1
+    this.width = props?.width ?? 0
+    this.height = props?.height ?? 0
+
+    const gridWidth = this.cols * this.tileSize
+    this.gridOffsetX = Math.floor((this.width - gridWidth) / 2)
+
+    const gridHeight = this.rows * this.tileSize
+    this.gridOffsetY = Math.floor((this.height - gridHeight) / 2)
+  }
 
   reset() {
-    this.grid.splice(0, this.grid.length)
+    this.#tilesmap.splice(0, this.#tilesmap.length)
 
-    const cells = this.childrenOfType(Cell)
-    for (const child of cells) {
+    const tiles = this.tiles
+    for (const child of tiles) {
       this.removeChild(child)
     }
   }
@@ -20,37 +66,56 @@ export class Grid extends GameObject {
 
     this.reset()
 
-    // add grid cells
-    for (let x = 0; x < scene.cols; x++) {
-      this.grid[x] = [] as Cell[]
+    // build tilesmap
+    for (let x = 0; x < this.cols; x++) {
+      this.#tilesmap[x] = [] as Tile[]
       const rowOdd = x % 2 === 0
 
-      for (let y = 0; y < scene.rows; y++) {
+      for (let y = 0; y < this.rows; y++) {
         const lineOdd = y % 2 === 0
 
-        this.grid[x][y] = new Cell({
-          indexX: x,
-          indexY: y,
-          cellX: scene.gridOffsetX + x * scene.tileSize,
-          cellY: scene.gridOffsetY + y * scene.tileSize,
-          cellWidth: scene.tileSize,
-          cellHeight: scene.tileSize
-        })
-
-        if (x === 0 && y === 0) {
-          // this.grid[x][y].isSpawn = true
-          this.grid[x][y].canBuild = false
-        } else if (x === scene.cols - 1 && y === scene.rows - 1) {
-          // this.grid[x][y].isGoal = true
-          this.grid[x][y].canBuild = false
+        if (x === 0 && y === 0 || (this.cols > 7 && x === 7 && y === 1)) {
+          this.#tilesmap[x][y] = new TileSpawner({
+            indexX: x,
+            indexY: y,
+            cornerX: this.gridOffsetX + x * this.tileSize,
+            cornerY: this.gridOffsetY + y * this.tileSize,
+            width: this.tileSize,
+            height: this.tileSize,
+            canBuild: false,
+            isOdd: rowOdd === lineOdd,
+          })
+        } else if (x === this.cols - 1 && y === this.rows - 1) {
+          this.#tilesmap[x][y] = new TileGoal({
+            indexX: x,
+            indexY: y,
+            cornerX: this.gridOffsetX + x * this.tileSize,
+            cornerY: this.gridOffsetY + y * this.tileSize,
+            width: this.tileSize,
+            height: this.tileSize,
+            canBuild: false,
+            isOdd: rowOdd === lineOdd,
+          })
+        } else {
+          this.#tilesmap[x][y] = new Tile({
+            indexX: x,
+            indexY: y,
+            cornerX: this.gridOffsetX + x * this.tileSize,
+            cornerY: this.gridOffsetY + y * this.tileSize,
+            width: this.tileSize,
+            height: this.tileSize,
+            isOdd: rowOdd === lineOdd,
+          })
+          const buldingInfo = state.buildings?.[x]?.[y]
+          if (buldingInfo) {
+            this.#tilesmap[x][y].addBuilding(new ArrowTower())
+          }
         }
 
-        if (rowOdd === lineOdd) {
-          this.grid[x][y].isOdd = true
-        }
-
-        this.addChild(this.grid[x][y])
+        this.addChild(this.#tilesmap[x][y])
       }
     }
+    
+    super.init()
   }
 }

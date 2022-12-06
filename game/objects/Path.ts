@@ -1,4 +1,4 @@
-import { Cell } from "./Cell"
+import { Tile, TileSpawner } from "./tiles"
 import { GameObject } from "./GameObject"
 import { Grid } from "./Grid"
 import { Scene } from "./Scene"
@@ -6,37 +6,61 @@ import { Scene } from "./Scene"
 import { getAStarPath } from "../utils"
 
 export class Path extends GameObject {
-  path: Cell[] = []
+  waypoints = new Map<TileSpawner, Tile[]>()
+
+  get scene () {
+    return this.parentOfType(Scene)
+  }
+
+  init() {
+    this.computePath()
+    super.init()
+  }
 
   computePath() {
-    const scene = this.parentOfType(Scene)
-    if (!scene) return
-    const grid = scene.childOfType(Grid)
-    if (!grid) return
+    const scene = this.scene
+    const grid = scene?.grid
+    if (!grid || !scene) return
 
-    const start = grid.grid[0][0] // top left cell
-    const goal = grid.grid[scene.cols - 1][scene.rows - 1] // bottom right cell
+    const spawnerTiles = grid?.spawnerTiles
+    if (!spawnerTiles?.length) return
 
-    this.path.splice(0, this.path.length)
-    this.path.push(...getAStarPath(start, goal))
+    const goalTile = grid?.goalTile
+    if (!goalTile) return
+
+    this.waypoints.clear()
+    for (const tile of spawnerTiles) {
+      const path = getAStarPath(tile, goalTile)
+      if (path.length === 0) continue
+      
+      this.waypoints.set(tile, path)
+    }
+    // this.waypoints.splice(0, this.waypoints.length)
+    // this.waypoints.push(...getAStarPath(start, goal))
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    if (!this.path.length) return
+    if (!this.waypoints.size) return
 
-    // draw magenta dashed line from first to last cell, passing through the middle cells
+    // draw magenta dashed line from first to last tile, passing through the middle tiles
 
-    ctx.save()
-    ctx.strokeStyle = 'magenta'
-    ctx.lineWidth = 3
-    ctx.setLineDash([4, 4])
+    for (const [spawner, path] of this.waypoints) {
+      if (!path.length) continue
 
-    ctx.beginPath()
-    ctx.moveTo(this.path[0].cellX + this.path[0].cellWidth / 2, this.path[0].cellY + this.path[0].cellHeight / 2)
-    for (let i = 1; i < this.path.length; i++) {
-      ctx.lineTo(this.path[i].cellX + this.path[i].cellWidth / 2, this.path[i].cellY + this.path[i].cellHeight / 2)
+  
+      ctx.beginPath()
+      ctx.moveTo(path[0].cornerX + path[0].width / 2, path[0].cornerY + path[0].height / 2)
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].cornerX + path[i].width / 2, path[i].cornerY + path[i].height / 2)
+      }
+
+      ctx.save()
+      ctx.strokeStyle = 'magenta'
+      ctx.lineWidth = 3
+      ctx.setLineDash([4, 4])
+      ctx.stroke()
+      ctx.restore()
     }
-    ctx.stroke()
-    ctx.restore()
+    
   }
 }
