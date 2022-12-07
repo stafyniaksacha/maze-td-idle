@@ -4,6 +4,7 @@ import type { MaybeRef } from "@vueuse/core"
 import { selectTile } from "./store"
 import { Scene } from "./objects"
 import { state } from './store'
+import { LAYERS } from "./layers"
 
 const FRAMES_PER_SECOND = 60
 const FRAME_MIN_TIME = (1000/60) * (60 / FRAMES_PER_SECOND) - (1000/60) * 0.5
@@ -16,12 +17,12 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
   const containerRef = shallowRef<HTMLElement | null>(null)
   const canvasRef = shallowRef<HTMLCanvasElement | null>(null)
 
-  // let canvas: HTMLCanvasElement | null = null
   let raf: number | null = null
   let ctx: CanvasRenderingContext2D | null = null
   let startedAt = 0
   let lastFrameAt = 0
 
+  // resize canvas to fit container
   function fitSize() {
     const canvas = canvasRef.value
     const container = containerRef.value
@@ -31,7 +32,8 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     canvas.height = container.offsetHeight
   }
   
-  async function init() {
+  // init scene
+  function init() {
     const canvas = unref(canvasRef)
     if (!canvas) return
 
@@ -46,6 +48,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     requestDraw()
   }
 
+  // draw loop
   function draw(time: number) {
     raf = null
     const canvas = unref(canvasRef)
@@ -58,29 +61,34 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     const deltaTime = time - lastFrameAt
 
     // throttle fps
-    if(time - lastFrameAt < FRAME_MIN_TIME){
+    if(deltaTime < FRAME_MIN_TIME) {
       requestDraw()
       return
     }
     lastFrameAt = time
 
-    // ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+    // clear canvas
     ctx.save()
     ctx.fillStyle = 'grey'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.restore()
 
-    state.scene?.drawTree(ctx)
+    state.scene?.update(deltaTime)
+
+    // draw all layers
+    state.scene?.drawTree(ctx, LAYERS.BACKGROUND)
+    state.scene?.drawTree(ctx, LAYERS.DEFAULT)
     requestDraw()
   }
 
+  // request animation frame if not already requested
   function requestDraw() {
     if (!raf) {
       raf = requestAnimationFrame(draw)
     }
   }
   
+  // clear animation frame on unmount
   onBeforeUnmount(() => {
     if (raf) {
       cancelAnimationFrame(raf)
@@ -88,6 +96,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     }
   })
 
+  // init canvas scene when html canvas is ready
   watch([canvasRef, containerRef], async () => {
     const canvas = canvasRef.value
     const container = containerRef.value
@@ -117,6 +126,7 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     init()
   })
   
+  // reinit when cols, rows or tileSize change
   watch([rows, cols, tileSize], async () => {
     fitSize()
     init()

@@ -6,6 +6,8 @@ import { state } from '../store'
 import { ArrowTower } from "./buildings"
 
 export class Grid extends GameObject {
+  #tilesmap: Tile[][] = []
+  
   gridOffsetX: number
   gridOffsetY: number
 
@@ -14,7 +16,6 @@ export class Grid extends GameObject {
   height: number
   rows: number
   cols: number
-  #tilesmap: Tile[][] = []
 
   get tilesmap () {
     return this.#tilesmap

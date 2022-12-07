@@ -1,11 +1,13 @@
 import { Building } from "../buildings"
 import { GameObject } from "../GameObject"
-import { Scene } from "../Scene"
 
 import { state } from '../../store'
 import { Grid } from "../Grid"
+import { LAYERS } from "../../layers"
 
 export class Tile extends GameObject {
+  layer: LAYERS = LAYERS.BACKGROUND
+
   indexX: number
   indexY: number
   cornerX: number

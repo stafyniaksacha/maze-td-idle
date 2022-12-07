@@ -35,8 +35,6 @@ export class Path extends GameObject {
       
       this.waypoints.set(tile, path)
     }
-    // this.waypoints.splice(0, this.waypoints.length)
-    // this.waypoints.push(...getAStarPath(start, goal))
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

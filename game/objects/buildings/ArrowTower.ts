@@ -8,7 +8,7 @@ class ArrowBullet extends GameObject {}
 export class ArrowTower extends BuildingAttacker {
   attackBullet: ArrowBullet | null = null;
   attackTarget: Enemy | null = null
-  attackRange: number = 100
+  attackRange: number = 75
   attackDamage: number = 1
   attackSpeed: number = 3
   attackedAt: number = 0

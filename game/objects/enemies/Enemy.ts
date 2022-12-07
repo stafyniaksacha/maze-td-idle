@@ -3,6 +3,9 @@ import { Tile } from "../tiles"
 import { GameObject } from "../GameObject"
 import { Scene } from "../Scene"
 
+/**
+ * @virtual See {@link isArrived| the WarningStyle enum}
+ */
 export class Enemy extends GameObject {
   centerX: number = 0
   centerY: number = 0
@@ -40,7 +43,8 @@ export class Enemy extends GameObject {
     return path[1]
   }
 
-  draw (ctx: CanvasRenderingContext2D) {
+  update (deltaTime: number): void {
+    super.update(deltaTime)
     if (!this.isAlive) return
     if (!this.target || this.isAtTarget()) {
       const nextTarget = this.findTarget()
@@ -53,17 +57,13 @@ export class Enemy extends GameObject {
       }
 
       this.target = nextTarget
+    } else if (this.target) {
+      // move toward target
+      if (this.centerX < this.target?.centerX) this.centerX += this.speed
+      else if (this.centerX >= this.target?.centerX) this.centerX -= this.speed
+
+      if (this.centerY <= this.target?.centerY) this.centerY += this.speed
+      else if (this.centerY > this.target?.centerY) this.centerY -= this.speed
     }
-  }
-
-  postdraw(ctx: CanvasRenderingContext2D): void {
-    if (!this.target) return
-
-    // move toward target
-    if (this.centerX < this.target?.centerX) this.centerX += this.speed
-    else if (this.centerX >= this.target?.centerX) this.centerX -= this.speed
-
-    if (this.centerY <= this.target?.centerY) this.centerY += this.speed
-    else if (this.centerY > this.target?.centerY) this.centerY -= this.speed
   }
 }

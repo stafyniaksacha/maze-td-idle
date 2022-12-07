@@ -28,7 +28,8 @@ export class Spawner extends GameObject {
     this.spawnedAt = 0
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  update(deltaTime: number): void {
+    super.update(deltaTime)
     if (!state.wave.started) return
     const now = performance.now()
     if (now - this.spawnedAt < this.spawnDelay) return
@@ -49,6 +50,8 @@ export class Spawner extends GameObject {
       enemy.onArrived = () => {
         state.wave.enemiesAlives--
         enemy.remove()
+
+        // todo: decrease player health
 
         if (!state.wave.enemiesAlives) {
           state.wave.started = false

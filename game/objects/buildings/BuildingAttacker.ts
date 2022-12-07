@@ -23,8 +23,10 @@ export abstract class BuildingAttacker extends Building {
     ctx.arc(tile.cornerX + tile.width /2, tile.cornerY + tile.width /2, this.attackRange, 0, 2 * Math.PI)
 
     ctx.save()
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.4)'
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.1)'
     ctx.fill()
+    ctx.strokeStyle = 'rgba(0, 255, 0, 1)'
+    ctx.stroke()
     ctx.restore()
   }
 }

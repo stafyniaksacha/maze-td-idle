@@ -1,42 +1,43 @@
-# Nuxt 3 Minimal Starter
+# MAZE TD IDLE
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
 ## Setup
 
-Make sure to install the dependencies:
+1. Check if you already have Node.js installed. Run this command in your terminal:
 
 ```bash
-# yarn
-yarn install
-
-# npm
-npm install
-
-# pnpm
-pnpm install --shamefully-hoist
+node -v
 ```
 
-## Development Server
+If node is not installed on your machine, you can go to the official nodejs.org website, and choose the version depending on your operating system:
 
-Start the development server on http://localhost:3000
+- <a href="https://nodejs.org/en/download/" target="_blank">Install node.js and npm on Windows, Linux or Mac OSX</a>
+
+2. Enable pnpm with corepack
 
 ```bash
-npm run dev
+corepack enable
+corepack prepare pnpm@latest --activate
 ```
 
-## Production
+> _corepack is installed with node from **v16.13.x**, if your version is below, install it with: `npm install -g corepack`_
 
-Build the application for production:
+To setup the template and start installing project dependencies, run one of the following commands:
 
 ```bash
-npm run build
+# using pnpm
+pnpm install
 ```
 
-Locally preview production build:
+
+## 🔃 Run a development server
+
+To start the development server, run the following commands:
 
 ```bash
-npm run preview
+# using pnpm
+pnpm dev
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+> - Access the Game in your browser at [http://localhost:3000/](http://localhost:3000/)
