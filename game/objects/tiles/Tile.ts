@@ -1,9 +1,9 @@
-import { Building } from "../buildings"
-import { GameObject } from "../GameObject"
+import { Building } from '../buildings'
+import { GameObject } from '../GameObject'
 
 import { state } from '../../store'
-import { Grid } from "../Grid"
-import { LAYERS } from "../../layers"
+import { Grid } from '../Grid'
+import { LAYERS } from '../../layers'
 
 export class Tile extends GameObject {
   layer: LAYERS = LAYERS.BACKGROUND
@@ -14,7 +14,7 @@ export class Tile extends GameObject {
   cornerY: number
   width: number
   height: number
-  walkCost: number = 1
+  walkCost = 1
   canWalk: boolean
   canBuild: boolean
   // isSpawn: boolean = false
@@ -30,20 +30,21 @@ export class Tile extends GameObject {
     return this.cornerY + this.height / 2
   }
 
-  get building() {
+  get building () {
     return this.childOfType(Building)
   }
-  get grid() {
+
+  get grid () {
     return this.parentOfType(Grid)
   }
 
-  get isInWorld() {
-    if (!this.grid) return false
-    
+  get isInWorld () {
+    if (!this.grid) { return false }
+
     return this.cornerX >= 0 && this.cornerX <= this.grid?.width && this.cornerY >= 0 && this.cornerY <= this.grid?.height
   }
 
-  constructor(
+  constructor (
     props?: {
       indexX?: number,
       indexY?: number,
@@ -69,7 +70,7 @@ export class Tile extends GameObject {
     this.isOdd = props?.isOdd ?? false
   }
 
-  addBuilding<T extends Building>(building: T) {
+  addBuilding<T extends Building> (building: T) {
     if (!this.canBuild) {
       throw new Error('Bulding cannot be placed here')
     }
@@ -84,14 +85,15 @@ export class Tile extends GameObject {
       this.canWalk = false
     }
   }
-  removeBuilding() {
+
+  removeBuilding () {
     this.removeChild(this.building)
     this.canWalk = true
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw (ctx: CanvasRenderingContext2D) {
     const grid = this.grid
-    if (!grid) return
+    if (!grid) { return }
 
     // Draw debug grid
     ctx.save()
@@ -121,7 +123,7 @@ export class Tile extends GameObject {
       ctx.lineWidth = 6
       ctx.strokeRect(this.cornerX + 3, this.cornerY + 3, grid.tileSize - 6, grid.tileSize - 6)
       ctx.restore()
-    } 
+    }
 
     // Draw selection
     if (state.selectedTile?.indexX === this.indexX && state.selectedTile?.indexY === this.indexY) {

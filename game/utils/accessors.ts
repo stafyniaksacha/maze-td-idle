@@ -1,11 +1,11 @@
 
-import { Tile, Grid } from '../objects'
+import { Tile } from '../objects'
 import { state } from '../store'
 
-export function getTileAtPos(x: number, y: number): Tile | null {
-  if (!state.scene) return null
+export function getTileAtPos (x: number, y: number): Tile | null {
+  if (!state.scene) { return null }
   const tiles = state.scene.grid?.tiles
-  if (!tiles) return null
+  if (!tiles) { return null }
 
   for (let i = 0; i < tiles.length; i++) {
     const tile = tiles[i]
@@ -17,16 +17,16 @@ export function getTileAtPos(x: number, y: number): Tile | null {
   return null
 }
 
-export function getTileAtIndex(indexX: number, indexY: number): Tile | null {
-  if (!state.scene) return null
+export function getTileAtIndex (indexX: number, indexY: number): Tile | null {
+  if (!state.scene) { return null }
   const grid = state.scene.grid
-  if (!grid) return null
+  if (!grid) { return null }
 
   return grid.tilesmap[indexX][indexY] as Tile
 }
 
-export function isTileSelected(tile?: Tile): boolean {
-  if (!tile) return false
-  if (!state.selectedTile) return false
+export function isTileSelected (tile?: Tile): boolean {
+  if (!tile) { return false }
+  if (!state.selectedTile) { return false }
   return state.selectedTile.indexX === tile.indexX && state.selectedTile.indexY === tile.indexY
 }

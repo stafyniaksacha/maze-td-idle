@@ -1,4 +1,4 @@
-import type { Tile, Scene } from "../objects";
+import type { Tile, Scene } from '../objects'
 
 interface GameState {
   isHover: boolean
@@ -15,5 +15,5 @@ export const state = reactive<GameState>({
   mousePosition: { x: 0, y: 0 },
   selectedTile: null,
   scene: null,
-  buildings: [],
+  buildings: []
 })

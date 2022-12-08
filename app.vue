@@ -7,8 +7,8 @@ const tileSize = ref(50)
 
 const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
 
-const building = computed(( ) =>  {
-  if (!state.selectedTile) return
+const building = computed(() => {
+  if (!state.selectedTile) { return }
 
   return state.buildings?.[state.selectedTile.indexX]?.[state.selectedTile.indexY]
 })
@@ -30,56 +30,72 @@ const building = computed(( ) =>  {
         <div class="flex flex-row p-2 gap-2">
           <div class="w-full flex flex-col gap-1">
             <label for="tileSize">tileSize</label>
-            <input id="tileSize" type="number" v-model="tileSize" step="2" min="2" />
+            <input id="tileSize" v-model="tileSize" type="number" step="2" min="2">
           </div>
         </div>
         <div class="flex flex-row p-2 gap-2">
           <div class="w-1/2 flex flex-col gap-1">
             <label for="rows">Rows</label>
-            <input id="rows" type="number" v-model="rows" min="1" />
+            <input id="rows" v-model="rows" type="number" min="1">
           </div>
           <div class="w-1/2 flex flex-col gap-1">
             <label for="cols">Cols</label>
-            <input id="cols" type="number" v-model="cols" min="1" />
+            <input id="cols" v-model="cols" type="number" min="1">
           </div>
         </div>
-        
-        <div class="flex flex-row" v-if="state.selectedTile?.indexX">
+
+        <div v-if="state.selectedTile" class="flex flex-row">
           <div class="bg-green-500 w-full flex gap-2 p-2">
-            <button type="button" class="w-1/2 border" @click="() => {
-              buildFireTrap()
-            }">
+            <button
+              type="button"
+              class="w-1/2 border"
+              @click="() => {
+                buildFireTrap()
+              }"
+            >
               build fire trap
             </button>
-            <button type="button" class="w-1/2 border" @click="() => {
-              buildArrowTower()
-            }">
+            <button
+              type="button"
+              class="w-1/2 border"
+              @click="() => {
+                buildArrowTower()
+              }"
+            >
               build arrow tower
             </button>
           </div>
         </div>
-        
-        <div class="flex flex-row" v-if="building">
+
+        <div v-if="building" class="flex flex-row">
           <div class="bg-red-500 w-full flex gap-2 p-2">
-            <button type="button" class="w-full border" @click="() => {
-              removeBuilding()
-            }">
+            <button
+              type="button"
+              class="w-full border"
+              @click="() => {
+                removeBuilding()
+              }"
+            >
               sell building
             </button>
           </div>
         </div>
 
-        <div class="flex flex-row" >
+        <div class="flex flex-row">
           <div class="bg-lime-500 w-full flex gap-2 p-2" :class="[state.wave.started ? 'bg-orange-600' : 'bg-lime-500']">
-            <button type="button" class="w-full border" @click="() => {
-              startWave()
-            }">
-              {{state.wave.started ? `wave in progress` : `start wave ${state.wave.current}`}}
+            <button
+              type="button"
+              class="w-full border"
+              @click="() => {
+                startWave()
+              }"
+            >
+              {{ state.wave.started ? `wave in progress` : `start wave ${state.wave.current}` }}
             </button>
           </div>
         </div>
-        
-        <div class="flex flex-row" v-if="state.selectedTile">
+
+        <div v-if="state.selectedTile" class="flex flex-row">
           <div class="bg-green-500 w-full">
             <!-- <pre>{{ state.selectedTile }}</pre> -->
           </div>
@@ -90,7 +106,6 @@ const building = computed(( ) =>  {
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>

@@ -1,10 +1,10 @@
-import { Scene, Tile, Grid } from "../objects"
+import { Tile } from '../objects'
 
-function heuristicCostEstimate(a: Tile, b: Tile) {
+function heuristicCostEstimate (a: Tile, b: Tile) {
   return Math.abs(a.indexX - b.indexX) + Math.abs(a.indexY - b.indexY) + a.walkCost + b.walkCost
 }
 
-function reconstructPath(cameFrom: WeakMap<Tile, Tile>, current: Tile) {
+function reconstructPath (cameFrom: WeakMap<Tile, Tile>, current: Tile) {
   const totalPath = [current]
   while (cameFrom.has(current)) {
     current = cameFrom.get(current)!
@@ -13,13 +13,12 @@ function reconstructPath(cameFrom: WeakMap<Tile, Tile>, current: Tile) {
   return totalPath
 }
 
-function getNeighbors(current: Tile) {
+function getNeighbors (current: Tile) {
   const grid = current?.grid
-  if (!grid) return []
+  if (!grid) { return [] }
 
   const neighbors = [] as Tile[]
   const { indexX, indexY } = current
-
 
   if (indexX > 0) {
     neighbors.push(grid.tilesmap[indexX - 1][indexY])
@@ -37,7 +36,7 @@ function getNeighbors(current: Tile) {
   return neighbors
 }
 
-export function getAStarPath(start: Tile, goal: Tile) {
+export function getAStarPath (start: Tile, goal: Tile) {
   const openSet = new Set<Tile>()
   openSet.add(start)
 
@@ -48,7 +47,6 @@ export function getAStarPath(start: Tile, goal: Tile) {
 
   gScore.set(start, 0)
   fScore.set(start, heuristicCostEstimate(start, goal))
-
 
   while (openSet.size) {
     let current: Tile | undefined
@@ -70,13 +68,12 @@ export function getAStarPath(start: Tile, goal: Tile) {
       return reconstructPath(cameFrom, current)
     }
 
-
     openSet.delete(current)
 
     const neighbors = getNeighbors(current)
 
     for (const neighbor of neighbors) {
-      if (!neighbor.canWalk) continue
+      if (!neighbor.canWalk) { continue }
 
       const tentativeGScore = (gScore.get(current) ?? 0) + heuristicCostEstimate(current, neighbor)
 

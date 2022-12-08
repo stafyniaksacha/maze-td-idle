@@ -1,14 +1,13 @@
-import { Enemy, BasicEnemy } from "./enemies"
-import { GameObject } from "./GameObject"
-import { Scene } from "./Scene"
-
 import { state } from '../store'
+import { Enemy, BasicEnemy } from './enemies'
+import { GameObject } from './GameObject'
+import { Scene } from './Scene'
 
 export class Spawner extends GameObject {
-  waveStartedAt: number = 0
+  waveStartedAt = 0
 
-  spawnedAt: number = 0
-  spawnDelay: number = 1000
+  spawnedAt = 0
+  spawnDelay = 1000
 
   get enemies () {
     return this.childrenOfType(Enemy)
@@ -18,9 +17,8 @@ export class Spawner extends GameObject {
     return this.parentOfType(Scene)
   }
 
-
   startWave () {
-    if (state.wave.started) return
+    if (state.wave.started) { return }
 
     state.wave.started = true
     state.wave.enemiesSpawned = 0
@@ -28,19 +26,19 @@ export class Spawner extends GameObject {
     this.spawnedAt = 0
   }
 
-  update(deltaTime: number): void {
+  update (deltaTime: number): void {
     super.update(deltaTime)
-    if (!state.wave.started) return
+    if (!state.wave.started) { return }
     const now = performance.now()
-    if (now - this.spawnedAt < this.spawnDelay) return
+    if (now - this.spawnedAt < this.spawnDelay) { return }
 
     this.spawnedAt = now
 
     const spawnerTiles = this.scene?.grid?.spawnerTiles
-    if (!spawnerTiles) return 
+    if (!spawnerTiles) { return }
     const inWorldSpawners = spawnerTiles.filter(tile => tile.isInWorld)
 
-    if (state.wave.enemiesSpawned >= state.wave.current * inWorldSpawners.length) return
+    if (state.wave.enemiesSpawned >= state.wave.current * inWorldSpawners.length) { return }
 
     for (const tile of inWorldSpawners) {
       const enemy = new BasicEnemy()

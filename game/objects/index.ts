@@ -4,5 +4,3 @@ export * from './GameObject'
 export * from './Grid'
 export * from './Path'
 export * from './Scene'
-
-

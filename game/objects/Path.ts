@@ -1,9 +1,7 @@
-import { Tile, TileSpawner } from "./tiles"
-import { GameObject } from "./GameObject"
-import { Grid } from "./Grid"
-import { Scene } from "./Scene"
-
-import { getAStarPath } from "../utils"
+import { getAStarPath } from '../utils'
+import { Tile, TileSpawner } from './tiles'
+import { GameObject } from './GameObject'
+import { Scene } from './Scene'
 
 export class Path extends GameObject {
   waypoints = new Map<TileSpawner, Tile[]>()
@@ -12,40 +10,39 @@ export class Path extends GameObject {
     return this.parentOfType(Scene)
   }
 
-  init() {
+  init () {
     this.computePath()
     super.init()
   }
 
-  computePath() {
+  computePath () {
     const scene = this.scene
     const grid = scene?.grid
-    if (!grid || !scene) return
+    if (!grid || !scene) { return }
 
     const spawnerTiles = grid?.spawnerTiles
-    if (!spawnerTiles?.length) return
+    if (!spawnerTiles?.length) { return }
 
     const goalTile = grid?.goalTile
-    if (!goalTile) return
+    if (!goalTile) { return }
 
     this.waypoints.clear()
     for (const tile of spawnerTiles) {
       const path = getAStarPath(tile, goalTile)
-      if (path.length === 0) continue
-      
+      if (path.length === 0) { continue }
+
       this.waypoints.set(tile, path)
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    if (!this.waypoints.size) return
+  draw (ctx: CanvasRenderingContext2D): void {
+    if (!this.waypoints.size) { return }
 
     // draw magenta dashed line from first to last tile, passing through the middle tiles
 
-    for (const [spawner, path] of this.waypoints) {
-      if (!path.length) continue
+    for (const [, path] of this.waypoints) {
+      if (!path.length) { continue }
 
-  
       ctx.beginPath()
       ctx.moveTo(path[0].cornerX + path[0].width / 2, path[0].cornerY + path[0].height / 2)
       for (let i = 1; i < path.length; i++) {
@@ -59,6 +56,5 @@ export class Path extends GameObject {
       ctx.stroke()
       ctx.restore()
     }
-    
   }
 }

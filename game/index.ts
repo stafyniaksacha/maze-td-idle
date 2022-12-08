@@ -1,4 +1,3 @@
-export * from './utils/astar'
 export * from './objects'
 export * from './store'
 export * from './utils'
