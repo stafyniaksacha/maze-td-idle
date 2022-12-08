@@ -86,7 +86,7 @@ export function selectTile(event: MouseEvent) {
     state.selectedTile = {
       indexX: tile?.indexX,
       indexY: tile?.indexY,
-      tile: tile
+      tile: markRaw(tile)
     }
   } else {
     state.selectedTile = null

@@ -4,7 +4,7 @@ import type { MaybeRef } from "@vueuse/core"
 import { selectTile } from "./store"
 import { Scene } from "./objects"
 import { state } from './store'
-import { LAYERS } from "./layers"
+import { LAYERS, LAYER_ORDER } from "./layers"
 
 const FRAMES_PER_SECOND = 60
 const FRAME_MIN_TIME = (1000/60) * (60 / FRAMES_PER_SECOND) - (1000/60) * 0.5
@@ -16,6 +16,15 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
 
   const containerRef = shallowRef<HTMLElement | null>(null)
   const canvasRef = shallowRef<HTMLCanvasElement | null>(null)
+
+  const layersOffcanvas = {
+    [LAYERS.BACKGROUND]: null,
+    [LAYERS.DEFAULT]: null,
+  } as Record<LAYERS, HTMLCanvasElement | null>
+  const layersCtx = {
+    [LAYERS.BACKGROUND]: null,
+    [LAYERS.DEFAULT]: null,
+  } as Record<LAYERS, CanvasRenderingContext2D | null>
 
   let raf: number | null = null
   let ctx: CanvasRenderingContext2D | null = null
@@ -30,6 +39,12 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
   
     canvas.width = container.offsetWidth
     canvas.height = container.offsetHeight
+
+    layersOffcanvas[LAYERS.BACKGROUND]!.width = canvas.width
+    layersOffcanvas[LAYERS.BACKGROUND]!.height = canvas.height
+  
+    layersOffcanvas[LAYERS.DEFAULT]!.width = canvas.width
+    layersOffcanvas[LAYERS.DEFAULT]!.height = canvas.height
   }
   
   // init scene
@@ -67,17 +82,25 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     }
     lastFrameAt = time
 
-    // clear canvas
-    ctx.save()
-    ctx.fillStyle = 'grey'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.restore()
-
     state.scene?.update(deltaTime)
 
-    // draw all layers
-    state.scene?.drawTree(ctx, LAYERS.BACKGROUND)
-    state.scene?.drawTree(ctx, LAYERS.DEFAULT)
+    // draw each layers
+    for (const layer of LAYER_ORDER) {
+      layersCtx[layer]!.clearRect(0, 0, canvas.width, canvas.height)
+      state.scene?.drawTree(layersCtx[layer]!, layer)
+    }
+
+    // ctx.save()
+    // ctx.fillStyle = 'grey'
+    // ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // ctx.restore()
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // draw layers to canvas
+    for (const layer of LAYER_ORDER) {
+      ctx.drawImage(layersOffcanvas[layer]!, 0, 0)
+    }
+
     requestDraw()
   }
 
@@ -102,7 +125,12 @@ export function useRenderer(_cols: MaybeRef<number>, _rows: MaybeRef<number>, _t
     const container = containerRef.value
     if (!canvas || !container) return
 
-    ctx = canvas.getContext('2d', { alpha: false })
+    layersOffcanvas[LAYERS.BACKGROUND] = document.createElement('canvas')
+    layersOffcanvas[LAYERS.DEFAULT] = document.createElement('canvas')
+
+    layersCtx[LAYERS.BACKGROUND] = layersOffcanvas[LAYERS.BACKGROUND]!.getContext('2d')
+    layersCtx[LAYERS.DEFAULT] = layersOffcanvas[LAYERS.DEFAULT]!.getContext('2d')
+    ctx = canvas.getContext('2d')
 
     canvas.onmouseenter = () => {
       if (state.isHover) return

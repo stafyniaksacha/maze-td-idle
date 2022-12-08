@@ -6,6 +6,8 @@ const rows = ref(3)
 const tileSize = ref(50)
 
 const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
+
+const building = computed(( ) => state.selectedTile?.tile?.building)
 </script>
 
 <template>
@@ -38,7 +40,7 @@ const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
           </div>
         </div>
         
-        <div class="flex flex-row" v-if="state.selectedTile">
+        <div class="flex flex-row" v-if="state.selectedTile?.indexX">
           <div class="bg-green-500 w-full flex gap-2 p-2">
             <button type="button" class="w-1/2 border" @click="() => {
               buildFireTrap()
@@ -53,7 +55,7 @@ const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
           </div>
         </div>
         
-        <div class="flex flex-row" v-if="state.selectedTile?.tile?.building">
+        <div class="flex flex-row" v-if="building">
           <div class="bg-red-500 w-full flex gap-2 p-2">
             <button type="button" class="w-full border" @click="() => {
               removeBuilding()
