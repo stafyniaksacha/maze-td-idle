@@ -7,7 +7,11 @@ const tileSize = ref(50)
 
 const { containerRef, canvasRef } = useRenderer(cols, rows, tileSize)
 
-const building = computed(( ) => state.selectedTile?.tile?.building)
+const building = computed(( ) =>  {
+  if (!state.selectedTile) return
+
+  return state.buildings?.[state.selectedTile.indexX]?.[state.selectedTile.indexY]
+})
 </script>
 
 <template>
