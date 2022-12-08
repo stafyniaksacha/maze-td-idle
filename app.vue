@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { state, useRenderer, buildFireTrap, buildArrowTower, removeBuilding, startWave } from './game'
+import { state, useRenderer, tryAddBuildingToSelection, ArrowTower, FireTrap, removeBuilding, startWave } from './game'
 
 const cols = ref(3)
 const rows = ref(3)
@@ -43,6 +43,34 @@ const building = computed(() => {
             <input id="cols" v-model="cols" type="number" min="1">
           </div>
         </div>
+        <div class="flex flex-row p-2 gap-2">
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Wave</div>
+            <div>{{ state.wave.current }}</div>
+          </div>
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Currency</div>
+            <div>{{ state.currency }}</div>
+          </div>
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Health</div>
+            <div>{{ state.health }}</div>
+          </div>
+        </div>
+        <div class="flex flex-row p-2 gap-2">
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Remaining</div>
+            <div>{{ state.wave.enemiesRemaining }}</div>
+          </div>
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Spawned</div>
+            <div>{{ state.wave.enemiesSpawned }}</div>
+          </div>
+          <div class="w-1/2 flex flex-col gap-1">
+            <div>Alive</div>
+            <div>{{ state.wave.enemiesAlives }}</div>
+          </div>
+        </div>
 
         <div v-if="state.selectedTile" class="flex flex-row">
           <div class="bg-green-500 w-full flex gap-2 p-2">
@@ -50,7 +78,7 @@ const building = computed(() => {
               type="button"
               class="w-1/2 border"
               @click="() => {
-                buildFireTrap()
+                tryAddBuildingToSelection(new FireTrap())
               }"
             >
               build fire trap
@@ -59,7 +87,7 @@ const building = computed(() => {
               type="button"
               class="w-1/2 border"
               @click="() => {
-                buildArrowTower()
+                tryAddBuildingToSelection(new ArrowTower())
               }"
             >
               build arrow tower

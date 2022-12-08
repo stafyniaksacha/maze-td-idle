@@ -16,14 +16,8 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
   const containerRef = shallowRef<HTMLElement | null>(null)
   const canvasRef = shallowRef<HTMLCanvasElement | null>(null)
 
-  const layersOffcanvas = {
-    [LAYERS.BACKGROUND]: null,
-    [LAYERS.DEFAULT]: null
-  } as Record<LAYERS, HTMLCanvasElement | null>
-  const layersCtx = {
-    [LAYERS.BACKGROUND]: null,
-    [LAYERS.DEFAULT]: null
-  } as Record<LAYERS, CanvasRenderingContext2D | null>
+  const layersOffcanvas = {} as Record<LAYERS, HTMLCanvasElement | null>
+  const layersCtx = {} as Record<LAYERS, CanvasRenderingContext2D | null>
 
   let raf: number | null = null
   let ctx: CanvasRenderingContext2D | null = null
@@ -39,11 +33,10 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
     canvas.width = container.offsetWidth
     canvas.height = container.offsetHeight
 
-    layersOffcanvas[LAYERS.BACKGROUND]!.width = canvas.width
-    layersOffcanvas[LAYERS.BACKGROUND]!.height = canvas.height
-
-    layersOffcanvas[LAYERS.DEFAULT]!.width = canvas.width
-    layersOffcanvas[LAYERS.DEFAULT]!.height = canvas.height
+    for (const layer of LAYER_ORDER) {
+      layersOffcanvas[layer]!.width = canvas.width
+      layersOffcanvas[layer]!.height = canvas.height
+    }
   }
 
   // init scene
@@ -56,9 +49,9 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
       height: canvas.height,
       cols: cols.value,
       rows: rows.value,
-      tileSize: tileSize.value
+      tileSize: tileSize.value,
     }))
-    state.scene?.init()
+    state.scene!.init()
     requestDraw()
   }
 
@@ -81,21 +74,19 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
     }
     lastFrameAt = time
 
-    state.scene?.update(deltaTime)
+    state.scene!.update(deltaTime)
 
-    // draw each layers
+    // draw each offcanvas layers
     for (const layer of LAYER_ORDER) {
+      // clear offcanvas layer
       layersCtx[layer]!.clearRect(0, 0, canvas.width, canvas.height)
-      state.scene?.drawTree(layersCtx[layer]!, layer)
+      state.scene!.drawTree(layersCtx[layer]!, layer)
     }
 
-    // ctx.save()
-    // ctx.fillStyle = 'grey'
-    // ctx.fillRect(0, 0, canvas.width, canvas.height)
-    // ctx.restore()
+    // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // draw layers to canvas
+    // draw offcanvas layers to canvas
     for (const layer of LAYER_ORDER) {
       ctx.drawImage(layersOffcanvas[layer]!, 0, 0)
     }
@@ -116,6 +107,14 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
       cancelAnimationFrame(raf)
       raf = null
     }
+
+    if (canvasRef.value) {
+      const canvas = canvasRef.value
+      canvas.onmouseenter = null
+      canvas.onmouseleave = null
+      canvas.onmousemove = null
+      canvas.onclick = null
+    }
   })
 
   // init canvas scene when html canvas is ready
@@ -124,11 +123,10 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
     const container = containerRef.value
     if (!canvas || !container) { return }
 
-    layersOffcanvas[LAYERS.BACKGROUND] = document.createElement('canvas')
-    layersOffcanvas[LAYERS.DEFAULT] = document.createElement('canvas')
-
-    layersCtx[LAYERS.BACKGROUND] = layersOffcanvas[LAYERS.BACKGROUND]!.getContext('2d')
-    layersCtx[LAYERS.DEFAULT] = layersOffcanvas[LAYERS.DEFAULT]!.getContext('2d')
+    for (const layer of LAYER_ORDER) {
+      layersOffcanvas[layer] = document.createElement('canvas')
+      layersCtx[layer] = layersOffcanvas[layer]!.getContext('2d')
+    }
     ctx = canvas.getContext('2d')
 
     canvas.onmouseenter = () => {
@@ -142,7 +140,7 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
     canvas.onmousemove = (event) => {
       state.mousePosition = {
         x: event.offsetX,
-        y: event.offsetY
+        y: event.offsetY,
       }
     }
     canvas.onclick = (event) => {
@@ -153,6 +151,15 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
     init()
   })
 
+  // watch([
+  //   () => state.grid.cols,
+  //   () => state.grid.rows,
+  //   () => state.grid.tileSize,
+  // ], () => {
+  //   fitSize()
+  //   init()
+  // })
+
   // reinit when cols, rows or tileSize change
   watch([rows, cols, tileSize], () => {
     fitSize()
@@ -162,8 +169,8 @@ export function useRenderer (_cols: MaybeRef<number>, _rows: MaybeRef<number>, _
   return {
     containerRef,
     canvasRef,
-    init,
+    // init,
     draw,
-    requestDraw
+    requestDraw,
   }
 }

@@ -28,7 +28,7 @@ export class Path extends GameObject {
 
     this.waypoints.clear()
     for (const tile of spawnerTiles) {
-      const path = getAStarPath(tile, goalTile)
+      const path = getAStarPath(tile, goalTile, grid.cols - 1, grid.rows - 1)
       if (path.length === 0) { continue }
 
       this.waypoints.set(tile, path)

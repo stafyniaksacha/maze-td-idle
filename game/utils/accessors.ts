@@ -1,4 +1,5 @@
 
+import type { ICenter, ICircle } from '../interfaces'
 import { Tile } from '../objects'
 import { state } from '../store'
 
@@ -29,4 +30,27 @@ export function isTileSelected (tile?: Tile): boolean {
   if (!tile) { return false }
   if (!state.selectedTile) { return false }
   return state.selectedTile.indexX === tile.indexX && state.selectedTile.indexY === tile.indexY
+}
+
+export function doesCirclesCollide (from: ICircle, to: ICircle) {
+  const dx = from.centerX - to.centerX
+  const dy = from.centerY - to.centerY
+  const distance = Math.sqrt(dx * dx + dy * dy)
+  return distance <= from.radius + to.radius
+}
+
+export function findNearestCircle<T extends ICenter> (from: ICenter, to: T[]): T | undefined {
+  let nearest: T | undefined
+  let nearestDistance = Infinity
+  for (let i = 0; i < to.length; i++) {
+    const circle = to[i]
+    const dx = from.centerX - circle.centerX
+    const dy = from.centerY - circle.centerY
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    if (distance < nearestDistance) {
+      nearestDistance = distance
+      nearest = circle
+    }
+  }
+  return nearest
 }

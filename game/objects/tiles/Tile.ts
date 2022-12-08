@@ -56,7 +56,7 @@ export class Tile extends GameObject {
       canBuild?: boolean
       isOdd?: boolean
     },
-    children?: GameObject[]
+    children?: GameObject[],
   ) {
     super(children)
     this.indexX = props?.indexX ?? 0

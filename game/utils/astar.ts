@@ -13,7 +13,7 @@ function reconstructPath (cameFrom: WeakMap<Tile, Tile>, current: Tile) {
   return totalPath
 }
 
-function getNeighbors (current: Tile) {
+function getNeighbors (current: Tile, maxX: number, maxY: number) {
   const grid = current?.grid
   if (!grid) { return [] }
 
@@ -23,20 +23,20 @@ function getNeighbors (current: Tile) {
   if (indexX > 0) {
     neighbors.push(grid.tilesmap[indexX - 1][indexY])
   }
-  if (indexX < grid.cols - 1) {
+  if (indexX < maxX) {
     neighbors.push(grid.tilesmap[indexX + 1][indexY])
   }
   if (indexY > 0) {
     neighbors.push(grid.tilesmap[indexX][indexY - 1])
   }
-  if (indexY < grid.rows - 1) {
+  if (indexY < maxY) {
     neighbors.push(grid.tilesmap[indexX][indexY + 1])
   }
 
   return neighbors
 }
 
-export function getAStarPath (start: Tile, goal: Tile) {
+export function getAStarPath (start: Tile, goal: Tile, maxX: number, maxY: number) {
   const openSet = new Set<Tile>()
   openSet.add(start)
 
@@ -70,7 +70,7 @@ export function getAStarPath (start: Tile, goal: Tile) {
 
     openSet.delete(current)
 
-    const neighbors = getNeighbors(current)
+    const neighbors = getNeighbors(current, maxX, maxY)
 
     for (const neighbor of neighbors) {
       if (!neighbor.canWalk) { continue }

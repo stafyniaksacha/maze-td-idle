@@ -17,11 +17,11 @@ export class Scene extends GameObject {
   }
 
   constructor (props?: {
+    width: number
+    height: number
     rows: number
     cols: number
     tileSize: number
-    width: number
-    height: number
   }) {
     super()
 

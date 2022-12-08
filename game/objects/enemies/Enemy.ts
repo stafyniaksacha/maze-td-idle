@@ -3,6 +3,8 @@ import { Tile } from '../tiles'
 import { GameObject } from '../GameObject'
 import { Scene } from '../Scene'
 
+import { state } from '../../store'
+
 /**
  * @virtual See {@link isArrived| the WarningStyle enum}
  */
@@ -10,23 +12,30 @@ export class Enemy extends GameObject {
   centerX = 0
   centerY = 0
   target: Tile | null = null
+  radius = 1
   speed = 0.4
-  health = 4
+  damageTaken = 0
+  baseHealth = 1
+  currencyOnKill = 1
+  healthDamage = 1
   isAlive = true
   isArrived = false
-  onDeath: () => void = () => {}
-  onArrived: () => void = () => {}
+  onDeath: (() => void) | undefined = undefined
+  onArrived: (() => void) | undefined = undefined
 
-  // onDeath () {
-  //   this.isArrived = false
-  //   this.isAlive = false
-  //   // this.remove()
-  // }
-  // onArrived () {
-  //   this.isArrived = true
-  //   this.isAlive = false
-  //   // this.remove()
-  // }
+  get health () {
+    return this.baseHealth + (this.baseHealth * 1.1 * (state.wave.current - 1) * 0.2)
+  }
+
+  takeDamage (damage: number) {
+    this.damageTaken += damage
+    if (this.damageTaken > this.health) {
+      this.onDeath?.()
+      this.isAlive = false
+      this.isArrived = false
+      this.remove()
+    }
+  }
 
   isAtTarget () {
     if (!this.target) { return false }
@@ -35,12 +44,19 @@ export class Enemy extends GameObject {
 
   findTarget (): Tile | null {
     const currentTile = getTileAtPos(this.centerX, this.centerY)
-    const goalTile = this.parentOfType(Scene)?.grid?.goalTile
+    const grid = this.parentOfType(Scene)?.grid
+    if (!grid) { return null }
+    const goalTile = grid?.goalTile
     if (!currentTile || !goalTile) { return null }
     if (currentTile === goalTile) { return null }
 
-    const path = getAStarPath(currentTile, goalTile)
+    const path = getAStarPath(currentTile, goalTile, grid.cols - 1, grid.rows - 1)
     return path[1]
+  }
+
+  remove () {
+    this.isAlive = false
+    super.remove()
   }
 
   update (deltaTime: number): void {
@@ -53,6 +69,7 @@ export class Enemy extends GameObject {
         this.isArrived = true
         this.isAlive = false
         this.target = null
+        this.remove()
         return
       }
 

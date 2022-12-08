@@ -49,7 +49,7 @@ export abstract class GameObject {
   }
 
   childrenOfType<T extends GameObject> (type: new (...args: any[]) => T): T[] {
-    return this.#children.filter(child => child instanceof type) as T[]
+    return this.#children.filter(child => child instanceof type) as T[] ?? []
   }
 
   childOfType<T extends GameObject> (type: new (...args: any[]) => T): T | undefined {

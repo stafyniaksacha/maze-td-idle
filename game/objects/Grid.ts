@@ -77,7 +77,7 @@ export class Grid extends GameObject {
       for (let y = 0; y < this.rows; y++) {
         const lineOdd = y % 2 === 0
 
-        if ((x === 0 && y === 0) || (this.cols > 7 && x === 7 && y === 1)) {
+        if ((x === 0 && y === 0) /* || (this.cols >= 9 && x === Math.round(this.cols / 2 - 1) && y === Math.round(this.rows / 2 - 1)) */) {
           this.#tilesmap[x][y] = new TileSpawner({
             indexX: x,
             indexY: y,
@@ -86,7 +86,7 @@ export class Grid extends GameObject {
             width: this.tileSize,
             height: this.tileSize,
             canBuild: false,
-            isOdd: rowOdd === lineOdd
+            isOdd: rowOdd === lineOdd,
           })
         } else if (x === this.cols - 1 && y === this.rows - 1) {
           this.#tilesmap[x][y] = new TileGoal({
@@ -97,7 +97,7 @@ export class Grid extends GameObject {
             width: this.tileSize,
             height: this.tileSize,
             canBuild: false,
-            isOdd: rowOdd === lineOdd
+            isOdd: rowOdd === lineOdd,
           })
         } else {
           this.#tilesmap[x][y] = new Tile({
@@ -107,7 +107,7 @@ export class Grid extends GameObject {
             cornerY: this.gridOffsetY + y * this.tileSize,
             width: this.tileSize,
             height: this.tileSize,
-            isOdd: rowOdd === lineOdd
+            isOdd: rowOdd === lineOdd,
           })
           const buldingInfo = state.buildings?.[x]?.[y]
           if (buldingInfo) {

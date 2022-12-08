@@ -1,6 +1,7 @@
 export const enum LAYERS {
   BACKGROUND = 0,
+  BULLETS = 8,
   DEFAULT = 10,
 }
 
-export const LAYER_ORDER = [LAYERS.BACKGROUND, LAYERS.DEFAULT] as const
+export const LAYER_ORDER = [LAYERS.BACKGROUND, LAYERS.BULLETS, LAYERS.DEFAULT] as const
